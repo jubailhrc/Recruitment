@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Application Form</title>
+  <style>
+    :root { --primary: #2563eb; --primary-hover: #1d4ed8; --bg: #f8fafc; --border: #cbd5e1; --error: #dc2626; --success: #16a34a; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; line-height: 1.5; padding: 1rem; }
+    .container { max-width: 700px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    h1 { text-align: center; margin-bottom: 1.5rem; color: #0f172a; font-size: 1.8rem; }
+    fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
+    legend { font-weight: 600; color: var(--primary); padding: 0 0.5rem; }
+    label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.95rem; }
+    input, select, textarea { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; margin-bottom: 1rem; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .hidden { display: none !important; }
+    .checkbox-group { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .checkbox-group input { width: auto; margin: 0; }
+    button { width: 100%; padding: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    button:hover:not(:disabled) { background: var(--primary-hover); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .msg { padding: 0.8rem; border-radius: 6px; margin-top: 1rem; text-align: center; font-weight: 500; display: none; }
+    .msg.success { background: #dcfce7; color: var(--success); }
+    .msg.error { background: #fee2e2; color: var(--error); }
+    .req::after { content: " *"; color: var(--error); }
+    .hint { font-size: 0.8rem; color: #64748b; margin-top: -0.8rem; margin-bottom: 1rem; display: block; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Job Application Form</h1>
+    <form id="appForm">
+      <input type="hidden" id="token" value="job_app_secret_2024_xyz">
+
+      <fieldset>
+        <legend>Personal & Demographic Info</legend>
+        <label class="req">Full Name</label><input type="text" name="name" required>
+        <label class="req">Email</label><input type="email" name="email" required>
+        <div class="row">
+          <div><label class="req">Phone</label><input type="tel" name="phone" pattern="[0-9+\-\s()]{7,15}" required></div>
+          <div><label class="req">Age</label><input type="number" name="age" min="18" max="65" required></div>
+        </div>
+        <div class="row">
+          <div><label class="req">Gender</label><select name="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div><label class="req">Marital Status</label><select name="marital_status" required><option value="">Select</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select></div>
+        </div>
+        <div class="row">
+          <div><label class="req">Nationality</label><input type="text" name="nationality" required></div>
+          <div><label class="req">Religion</label><select name="religion" required><option value="">Select</option><option>Muslim</option><option>Other</option></select></div>
+        </div>
+        <label>City / Location</label><input type="text" name="location">
+      </fieldset>
+
+      <fieldset>
+        <legend>Physical & Lifestyle</legend>
+        <div class="row">
+          <div><label class="req">Height (cm or ft)</label><input type="text" name="height" placeholder="e.g., 175 cm" required></div>
+          <div><label class="req">Weight (kg or lbs)</label><input type="text" name="weight" placeholder="e.g., 70 kg" required></div>
+        </div>
+        <div class="row">
+          <div><label class="req">Body Type</label><select name="body_type" required><option value="">Select</option><option>Slim</option><option>Average</option><option>Athletic</option><option>Heavy</option></select></div>
+          <div><label class="req">Smoking</label><select name="smoking" required><option value="">Select</option><option>Yes</option><option>No</option></select></div>
+        </div>
+        <div class="row">
+          <div><label class="req">Pets Preference</label><select name="pets_attitude" required><option value="">Select</option><option>Like</option><option>Dislike</option><option>Neutral</option></select></div>
+          <div><label class="req">Housing</label><select name="housing_pref" required><option value="">Select</option><option>Self-Arranged</option><option>Company-Provided</option></select></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Position & Employment</legend>
+        <label class="req">Position Applied For</label>
+        <select name="position" required><option value="">Select</option><option>Software Engineer</option><option>Marketing Specialist</option><option>Sales Rep</option><option>HR Coordinator</option><option>Other</option></select>
+        <input type="text" name="position_other" class="hidden" placeholder="Specify position">
+
+        <label class="req">Employment Type</label>
+        <select name="emp_type" required><option value="">Select</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option></select>
+
+        <div class="row">
+          <div><label class="req">Start Date</label><input type="date" name="start_date" required></div>
+          <div><label>Expected Salary</label><input type="text" name="expected_salary" placeholder="Optional"></div>
+        </div>
+        <div class="row">
+          <div><label class="req">Experience</label><select name="experience" required><option value="">Select</option><option>0-1 yrs</option><option>2-3 yrs</option><option>4-5 yrs</option><option>6-9 yrs</option><option>10+ yrs</option></select></div>
+          <div><label class="req">Education</label><select name="education" required><option value="">Select</option><option>High School</option><option>Bachelor's</option><option>Master's</option><option>PhD</option><option>Other</option></select></div>
+        </div>
+        <input type="text" name="education_other" class="hidden" placeholder="Specify education">
+        <label>Current/Most Recent Employer</label><input type="text" name="employer">
+        <label>Key Skills</label><textarea name="skills" rows="2" placeholder="Comma-separated"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>Documents & Media</legend>
+        <span class="hint">Max 5MB per file. PDF, DOC, JPG, PNG allowed.</span>
+        <label class="req">Resume / CV</label><input type="file" name="resume_file" accept=".pdf,.doc,.docx" required>
+        <label class="req">Full Body Picture</label><input type="file" name="fullbody_file" accept=".jpg,.jpeg,.png" required>
+        <label>Personal Picture / ID</label><input type="file" name="profile_file" accept=".jpg,.jpeg,.png,.pdf">
+        <textarea name="file_notes" rows="2" class="hidden" placeholder="Add notes about your uploaded files..."></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>Preferences & Consent</legend>
+        <label class="req">Contact Previous Employers?</label>
+        <select name="contact_prev" required><option value="">Select</option><option>Yes</option><option>No</option></select>
+
+        <label class="req">How did you hear about us?</label>
+        <select name="source" required><option value="">Select</option><option>Job Board</option><option>Referral</option><option>Social Media</option><option>Company Website</option><option>Other</option></select>
+        <input type="text" name="source_other" class="hidden" placeholder="Specify source">
+
+        <div class="checkbox-group"><input type="checkbox" id="consent" required><label for="consent" class="req">I agree to the processing of my personal data for recruitment purposes</label></div>
+        <div class="checkbox-group"><input type="checkbox" id="newsletter"><label for="newsletter">Subscribe to future job alerts</label></div>
+      </fieldset>
+
+      <button type="submit" id="submitBtn" disabled>Submit Application</button>
+      <div id="statusMsg" class="msg"></div>
+    </form>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE';
+    const form = document.getElementById('appForm');
+    const btn = document.getElementById('submitBtn');
+    const msg = document.getElementById('statusMsg');
+    const fileFields = ['resume_file', 'fullbody_file', 'profile_file'];
+
+    // Conditional UI Toggles
+    const toggle = (el, show) => el.classList.toggle('hidden', !show);
+    
+    form.querySelector('[name="position"]').addEventListener('change', e => toggle(form.querySelector('[name="position_other"]'), e.target.value === 'Other'));
+    form.querySelector('[name="education"]').addEventListener('change', e => toggle(form.querySelector('[name="education_other"]'), e.target.value === 'Other'));
+    form.querySelector('[name="source"]').addEventListener('change', e => toggle(form.querySelector('[name="source_other"]'), e.target.value === 'Other'));
+    
+    const anyFileUploaded = () => fileFields.some(f => form[f].files.length > 0);
+    fileFields.forEach(f => form[f].addEventListener('change', () => toggle(form.querySelector('[name="file_notes"]'), anyFileUploaded())));
+
+    // Religion & Consent Validation
+    const validateForm = () => {
+      const rel = form.religion.value;
+      const cons = form.consent.checked;
+      if (rel !== 'Muslim') {
+        msg.textContent = 'This opportunity is exclusively for Muslim applicants.';
+        msg.className = 'msg error'; msg.style.display = 'block';
+      } else {
+        msg.style.display = 'none';
+      }
+      btn.disabled = !form.checkValidity() || !cons || rel !== 'Muslim';
+    };
+    form.addEventListener('input', validateForm);
+    form.addEventListener('change', validateForm);
+
+    // File to Base64
+    const toBase64 = file => new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    // Retry Logic
+    const submitWithRetry = async (url, payload, attempts = 3, delay = 1000) => {
+      for (let i = 0; i < attempts; i++) {
+        try {
+          const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
+          return await res.json();
+        } catch (e) {
+          if (i === attempts - 1) throw e;
+          await new Promise(r => setTimeout(r, delay * (i + 1)));
+        }
+      }
+    };
+
+    // Submit Handler
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true; btn.textContent = 'Processing & Uploading...';
+      msg.style.display = 'none';
+
+      try {
+        const payload = { token: document.getElementById('token').value };
+        
+        // Gather standard fields
+        Array.from(form.elements).forEach(el => {
+          if (el.name && !fileFields.includes(el.name)) {
+            payload[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+          }
+        });
+
+        // Process files
+        for (const field of fileFields) {
+          if (form[field].files.length > 0) {
+            const file = form[field].files[0];
+            if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name} exceeds 5MB limit.`);
+            payload[field] = await toBase64(file);
+            payload[`${field}_name`] = file.name;
+            payload[`${field}_type`] = file.type;
+          }
+        }
+
+        const result = await submitWithRetry(APPS_SCRIPT_URL, payload);
+        msg.textContent = result.message;
+        msg.className = `msg ${result.status === 'success' ? 'success' : 'error'}`;
+        msg.style.display = 'block';
+        if (result.status === 'success') form.reset(); validateForm();
+      } catch (err) {
+        msg.textContent = 'Network error. Please try again.';
+        msg.className = 'msg error'; msg.style.display = 'block';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit Application';
+      }
+    });
+
+    validateForm();
+  </script>
+</body>
+</html>

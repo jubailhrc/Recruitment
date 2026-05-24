@@ -212,7 +212,72 @@
         btn.disabled = false; btn.textContent = 'Submit Application';
       }
     });
+<script>
+  // ... keep everything above unchanged ...
 
+  const submitWithRetry = async (url, payload, attempts = 3, delay = 1000) => {
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const res = await fetch(url, { 
+          method: 'POST', 
+          headers: {'Content-Type': 'text/plain;charset=utf-8'}, 
+          body: JSON.stringify(payload) 
+        });
+        
+        // Apps Script sometimes returns HTML on error. Force JSON parse safely.
+        const text = await res.text();
+        try { return JSON.parse(text); } 
+        catch { throw new Error(`Server returned non-JSON: ${text.substring(0, 100)}`); }
+        
+      } catch (e) {
+        console.error(`Attempt ${i+1} failed:`, e);
+        if (i === attempts - 1) throw e;
+        await new Promise(r => setTimeout(r, delay * (i + 1)));
+      }
+    }
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true; btn.textContent = 'Processing & Uploading...';
+    msg.style.display = 'none';
+
+    try {
+      const payload = { token: document.getElementById('token').value };
+      
+      Array.from(form.elements).forEach(el => {
+        if (el.name && !fileFields.includes(el.name)) {
+          payload[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+        }
+      });
+
+      for (const field of fileFields) {
+        if (form[field].files.length > 0) {
+          const file = form[field].files[0];
+          if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name} exceeds 5MB limit.`);
+          payload[field] = await toBase64(file);
+          payload[`${field}_name`] = file.name;
+          payload[`${field}_type`] = file.type;
+        }
+      }
+
+      console.log('Sending payload...', payload);
+      const result = await submitWithRetry(APPS_SCRIPT_URL, payload);
+      console.log('Server response:', result);
+      
+      msg.textContent = result.message;
+      msg.className = `msg ${result.status === 'success' ? 'success' : 'error'}`;
+      msg.style.display = 'block';
+      if (result.status === 'success') form.reset(); validateForm();
+    } catch (err) {
+      console.error('Submission failed:', err);
+      msg.textContent = `Error: ${err.message || 'Network failed. Check console (F12).'}`;
+      msg.className = 'msg error'; msg.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Submit Application';
+    }
+  });
+</script>
     validateForm();
   </script>
 </body>

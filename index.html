@@ -36,6 +36,7 @@
     <form id="appForm">
       <input type="hidden" id="token" value="job_app_secret_2024_xyz">
 
+      <!-- Section 1: Personal & Demographic Info -->
       <fieldset>
         <legend>Personal & Demographic Info</legend>
         <label class="req">Full Name</label><input type="text" name="name" required>
@@ -55,6 +56,7 @@
         <label>City / Location</label><input type="text" name="location">
       </fieldset>
 
+      <!-- Section 2: Physical & Lifestyle -->
       <fieldset>
         <legend>Physical & Lifestyle</legend>
         <div class="row">
@@ -71,6 +73,7 @@
         </div>
       </fieldset>
 
+      <!-- Section 3: Position & Employment -->
       <fieldset>
         <legend>Position & Employment</legend>
         <label class="req">Position Applied For</label>
@@ -93,6 +96,7 @@
         <label>Key Skills</label><textarea name="skills" rows="2" placeholder="Comma-separated"></textarea>
       </fieldset>
 
+      <!-- Section 4: Documents & Media -->
       <fieldset>
         <legend>Documents & Media</legend>
         <span class="hint">Max 5MB per file. PDF, DOC, JPG, PNG allowed.</span>
@@ -102,6 +106,7 @@
         <textarea name="file_notes" rows="2" class="hidden" placeholder="Add notes about your uploaded files..."></textarea>
       </fieldset>
 
+      <!-- Section 5: Preferences & Consent -->
       <fieldset>
         <legend>Preferences & Consent</legend>
         <label class="req">Contact Previous Employers?</label>
@@ -120,8 +125,11 @@
     </form>
   </div>
 
+  <!-- ✅ SINGLE, CLEAN SCRIPT BLOCK -->
   <script>
+    // 🔑 REPLACE WITH YOUR DEPLOYED WEB APP URL (ends in /exec)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrCTkOm5xW0rZyqC1c_reclYzBpP9y3eYJ1ZIkygcatuFupne473zvg3e480nRQGBV/exec';
+    
     const form = document.getElementById('appForm');
     const btn = document.getElementById('submitBtn');
     const msg = document.getElementById('statusMsg');
@@ -130,12 +138,17 @@
     // Conditional UI Toggles
     const toggle = (el, show) => el.classList.toggle('hidden', !show);
     
-    form.querySelector('[name="position"]').addEventListener('change', e => toggle(form.querySelector('[name="position_other"]'), e.target.value === 'Other'));
-    form.querySelector('[name="education"]').addEventListener('change', e => toggle(form.querySelector('[name="education_other"]'), e.target.value === 'Other'));
-    form.querySelector('[name="source"]').addEventListener('change', e => toggle(form.querySelector('[name="source_other"]'), e.target.value === 'Other'));
+    form.querySelector('[name="position"]').addEventListener('change', e => 
+      toggle(form.querySelector('[name="position_other"]'), e.target.value === 'Other'));
+    form.querySelector('[name="education"]').addEventListener('change', e => 
+      toggle(form.querySelector('[name="education_other"]'), e.target.value === 'Other'));
+    form.querySelector('[name="source"]').addEventListener('change', e => 
+      toggle(form.querySelector('[name="source_other"]'), e.target.value === 'Other'));
     
     const anyFileUploaded = () => fileFields.some(f => form[f].files.length > 0);
-    fileFields.forEach(f => form[f].addEventListener('change', () => toggle(form.querySelector('[name="file_notes"]'), anyFileUploaded())));
+    fileFields.forEach(f => 
+      form[f].addEventListener('change', () => 
+        toggle(form.querySelector('[name="file_notes"]'), anyFileUploaded())));
 
     // Religion & Consent Validation
     const validateForm = () => {
@@ -143,7 +156,8 @@
       const cons = form.consent.checked;
       if (rel !== 'Muslim') {
         msg.textContent = 'This opportunity is exclusively for Muslim applicants.';
-        msg.className = 'msg error'; msg.style.display = 'block';
+        msg.className = 'msg error'; 
+        msg.style.display = 'block';
       } else {
         msg.style.display = 'none';
       }
@@ -160,13 +174,23 @@
       reader.readAsDataURL(file);
     });
 
-    // Retry Logic
+    // Retry Logic with JSON Safety
     const submitWithRetry = async (url, payload, attempts = 3, delay = 1000) => {
       for (let i = 0; i < attempts; i++) {
         try {
-          const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
-          return await res.json();
+          const res = await fetch(url, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'text/plain;charset=utf-8'}, 
+            body: JSON.stringify(payload) 
+          });
+          const text = await res.text();
+          try { 
+            return JSON.parse(text); 
+          } catch { 
+            throw new Error(`Server returned non-JSON: ${text.substring(0, 150)}`); 
+          }
         } catch (e) {
+          console.error(`Attempt ${i+1} failed:`, e);
           if (i === attempts - 1) throw e;
           await new Promise(r => setTimeout(r, delay * (i + 1)));
         }
@@ -176,7 +200,8 @@
     // Submit Handler
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      btn.disabled = true; btn.textContent = 'Processing & Uploading...';
+      btn.disabled = true; 
+      btn.textContent = 'Processing & Uploading...';
       msg.style.display = 'none';
 
       try {
@@ -200,84 +225,37 @@
           }
         }
 
+        // Debug log (files redacted for privacy)
+        console.log('Sending payload...', { 
+          ...payload, 
+          resume_file: '[REDACTED]', 
+          fullbody_file: '[REDACTED]', 
+          profile_file: '[REDACTED]' 
+        });
+        
         const result = await submitWithRetry(APPS_SCRIPT_URL, payload);
+        console.log('Server response:', result);
+        
         msg.textContent = result.message;
         msg.className = `msg ${result.status === 'success' ? 'success' : 'error'}`;
         msg.style.display = 'block';
-        if (result.status === 'success') form.reset(); validateForm();
+        
+        if (result.status === 'success') { 
+          form.reset(); 
+          validateForm(); 
+        }
       } catch (err) {
-        msg.textContent = 'Network error. Please try again.';
-        msg.className = 'msg error'; msg.style.display = 'block';
+        console.error('Submission failed:', err);
+        msg.textContent = `Error: ${err.message || 'Network failed. Check console (F12).'}`;
+        msg.className = 'msg error'; 
+        msg.style.display = 'block';
       } finally {
-        btn.disabled = false; btn.textContent = 'Submit Application';
+        btn.disabled = false; 
+        btn.textContent = 'Submit Application';
       }
     });
-<script>
-  // ... keep everything above unchanged ...
 
-  const submitWithRetry = async (url, payload, attempts = 3, delay = 1000) => {
-    for (let i = 0; i < attempts; i++) {
-      try {
-        const res = await fetch(url, { 
-          method: 'POST', 
-          headers: {'Content-Type': 'text/plain;charset=utf-8'}, 
-          body: JSON.stringify(payload) 
-        });
-        
-        // Apps Script sometimes returns HTML on error. Force JSON parse safely.
-        const text = await res.text();
-        try { return JSON.parse(text); } 
-        catch { throw new Error(`Server returned non-JSON: ${text.substring(0, 100)}`); }
-        
-      } catch (e) {
-        console.error(`Attempt ${i+1} failed:`, e);
-        if (i === attempts - 1) throw e;
-        await new Promise(r => setTimeout(r, delay * (i + 1)));
-      }
-    }
-  };
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    btn.disabled = true; btn.textContent = 'Processing & Uploading...';
-    msg.style.display = 'none';
-
-    try {
-      const payload = { token: document.getElementById('token').value };
-      
-      Array.from(form.elements).forEach(el => {
-        if (el.name && !fileFields.includes(el.name)) {
-          payload[el.name] = el.type === 'checkbox' ? el.checked : el.value;
-        }
-      });
-
-      for (const field of fileFields) {
-        if (form[field].files.length > 0) {
-          const file = form[field].files[0];
-          if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name} exceeds 5MB limit.`);
-          payload[field] = await toBase64(file);
-          payload[`${field}_name`] = file.name;
-          payload[`${field}_type`] = file.type;
-        }
-      }
-
-      console.log('Sending payload...', payload);
-      const result = await submitWithRetry(APPS_SCRIPT_URL, payload);
-      console.log('Server response:', result);
-      
-      msg.textContent = result.message;
-      msg.className = `msg ${result.status === 'success' ? 'success' : 'error'}`;
-      msg.style.display = 'block';
-      if (result.status === 'success') form.reset(); validateForm();
-    } catch (err) {
-      console.error('Submission failed:', err);
-      msg.textContent = `Error: ${err.message || 'Network failed. Check console (F12).'}`;
-      msg.className = 'msg error'; msg.style.display = 'block';
-    } finally {
-      btn.disabled = false; btn.textContent = 'Submit Application';
-    }
-  });
-</script>
+    // Initialize validation on load
     validateForm();
   </script>
 </body>
